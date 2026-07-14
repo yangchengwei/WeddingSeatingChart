@@ -1,53 +1,505 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>測試網頁</title>
-    <style>
-        /* 這裡放一些簡單的 CSS 來讓畫面好看一點 */
-        body {
-            font-family: "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            text-align: center;
-            padding-top: 100px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>婚禮座位查詢</title>
+<style>
+    :root {
+        --primary-color: #ffb6c1;
+        --bg-color: #fdfbf7;
+        --text-color: #5c4a4d;
+    }
+    body {
+        font-family: 'Helvetica Neue', Arial, 'LiHei Pro', '微軟正黑體', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    h1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+        color: #e5989b;
+        text-align: center;
+        letter-spacing: 2px;
+    }
+    .search-container {
+        background: #fff;
+        border: 2px solid #e5989b;
+        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+        padding: 25px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 4px 4px 0px #f8cad0;
+        margin-bottom: 30px;
+    }
+    .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        border-bottom: 2px dashed #f8cad0;
+        padding-bottom: 5px;
+        text-align: center;
+    }
+    .search-row {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    select, input {
+        font-size: 15px;
+        padding: 10px;
+        border: 2px solid #e5989b;
+        border-radius: 10px;
+        outline: none;
+        background-color: #fff;
+        flex: 1;
+        font-family: inherit;
+    }
+    input:focus, select:focus {
+        border-color: #b5838d;
+    }
+    button {
+        background-color: #e5989b;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.2s;
+        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+        padding: 10px 20px;
+        border: 2px solid #e5989b;
+        font-size: 15px;
+        white-space: nowrap;
+    }
+    button:hover {
+        background-color: #d58386;
+    }
+    button:active {
+        transform: translateY(2px);
+    }
+    .divider {
+        border-top: 1px dashed #ccc;
+        margin: 20px 0;
+    }
+
+    .content-wrapper {
+        display: flex;
+        flex-direction: row;
+        gap: 30px;
+        width: 100%;
+        max-width: 1000px;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    @media (max-width: 768px) {
+        .content-wrapper {
+            flex-direction: column;
+            align-items: center;
         }
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        h1 {
-            color: #0056b3;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        button:hover {
-            background-color: #004494;
-        }
-    </style>
+    }
+
+    /* 地圖排版 */
+    .map-container {
+        width: 100%;
+        max-width: 600px; 
+        background: #fff;
+        border: 2px solid #e5989b;
+        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
+        padding: 25px;
+        box-shadow: 4px 4px 0px #f8cad0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); 
+        grid-template-rows: repeat(8, auto); 
+        gap: 20px; 
+        justify-items: center;
+        align-items: center;
+        position: relative;
+    }
+
+    /* 懸浮紅毯 */
+    .red-carpet {
+        grid-column: 1 / 3; 
+        grid-row: 1 / span 8; 
+        justify-self: center;
+        width: 45px; 
+        height: 100%;
+        background-color: #e27396; 
+        border: 3px dashed #ffe5e5; 
+        border-radius: 12px;
+        box-shadow: 2px 2px 0px rgba(181, 131, 141, 0.2);
+        z-index: 1; 
+    }
+
+    .table-circle {
+        width: 70px;
+        height: 70px;
+        background-color: #fff;
+        border: 2px solid #b5838d;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #b5838d;
+        transition: all 0.3s ease;
+        text-align: center;
+        box-shadow: 2px 2px 0px rgba(181, 131, 141, 0.2);
+        z-index: 2; 
+        position: relative;
+    }
+    .table-circle.main-table {
+        width: 90px;
+        height: 90px;
+        font-size: 16px;
+        background-color: #f8cad0;
+        border-color: #e5989b;
+        color: #fff;
+    }
+    .table-circle.highlight {
+        background-color: #ffb4a2;
+        border-color: #e5989b;
+        color: #fff;
+        transform: scale(1.2) rotate(-3deg);
+        box-shadow: 0 0 15px rgba(229, 152, 155, 0.8);
+        z-index: 10;
+    }
+
+    /* 同桌名單面板 */
+    .guest-list-panel {
+        width: 100%;
+        max-width: 300px;
+        background: #fff;
+        border: 2px solid #e5989b;
+        border-radius: 15px 255px 15px 225px/255px 15px 225px 15px; 
+        padding: 20px;
+        box-shadow: 4px 4px 0px #f8cad0;
+        display: none; 
+        flex-direction: column;
+    }
+    .guest-list-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e5989b;
+        margin-bottom: 15px;
+        text-align: center;
+        border-bottom: 2px dashed #f8cad0;
+        padding-bottom: 10px;
+    }
+    .guest-list-content {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        line-height: 1.8;
+    }
+    .guest-list-content li {
+        font-size: 15px;
+        padding-left: 10px;
+        position: relative;
+        margin-bottom: 4px;
+    }
+    .guest-list-content li::before {
+        content: "♥";
+        color: #ffb4a2;
+        position: absolute;
+        left: -10px;
+        font-size: 12px;
+    }
+    .guest-highlight {
+        font-weight: bold;
+        color: #d58386;
+        background-color: #fff0f3;
+        padding: 3px 6px;
+        border-radius: 8px;
+        display: inline-block;
+    }
+    .seat-count {
+        font-size: 13px;
+        color: #b5838d;
+        font-weight: normal;
+        margin-left: 4px;
+    }
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>這是一個測試網頁 🚀</h1>
-        <p>哈囉！如果你看到這個畫面，代表你的 HTML 已經成功運行了。</p>
-        
-        <!-- 一個簡單的按鈕測試 JavaScript 功能 -->
-        <button onclick="alert('測試成功！你的 JavaScript 也能正常運作！')">點擊測試</button>
+<h1>💕 婚禮座位查詢 💕</h1>
+
+<div class="search-container">
+    <div class="section-title">搜尋稱謂</div>
+    <div class="search-row">
+        <select id="side-select" onchange="updateElderOptions()">
+            <option value="">男方 / 女方</option>
+            <option value="male">男方</option>
+            <option value="female">女方</option>
+        </select>
+        <select id="elder-select">
+            <option value="">請先選擇</option>
+        </select>
+        <button onclick="searchRelative()">搜尋</button>
     </div>
 
+    <div class="divider"></div>
+
+    <div class="section-title">搜尋姓名</div>
+    <div class="search-row">
+        <input type="text" id="friend-name" placeholder="請輸入全名 (如：楊承尉)">
+        <button onclick="searchFriend()">搜尋</button>
+    </div>
+</div>
+
+<div class="content-wrapper">
+    <div class="map-container" id="map">
+        <!-- 桌次地圖將由 JS 生成 -->
+    </div>
+
+    <div class="guest-list-panel" id="guest-panel">
+        <div class="guest-list-title" id="guest-panel-title">同桌名單</div>
+        <ul class="guest-list-content" id="guest-list">
+            <!-- 名單將由 JS 填入 -->
+        </ul>
+    </div>
+</div>
+
+<script>
+/**
+ * 📝 【總控制台】只需要在這裡更新所有資料即可！
+ * 
+ * ⭐ 長輩分類進階技巧：
+ * 在長輩稱謂後方加上以下標籤，系統會自動將他們放入對應選單，並套用專屬底色：
+ * - |男爸 (男方爸爸的親戚 -> 淺藍底色)
+ * - |男媽 (男方媽媽的親戚 -> 淺紅底色)
+ * - |女爸 (女方爸爸的親戚 -> 淺藍底色)
+ * - |女媽 (女方媽媽的親戚 -> 淺紅底色)
+ */
+const weddingData = [
+    { table: "主桌", col: 2, row: 1, guests: ["任靜宜", "楊承尉", "爸爸|男爸", "媽媽|男媽", "奶奶|男爸", "姑奶奶|男爸", "爸爸|女爸", "媽媽|女媽", "二伯|女爸", "二伯母|女爸", "大舅公|男爸", "大舅婆|男爸"] },
+    
+    // 楊 (爸爸那邊)
+    { table: "楊1", col: 1, row: 2, guests: ["小舅公|男爸", "小舅婆|男爸", "大姑丈|男爸", "大姑姑|男爸", "小姑丈|男爸", "小姑姑|男爸", "Uncle|男爸", "Aunty|男爸"] },
+    // 任 (爸爸那邊)
+    { table: "任1", col: 2, row: 2, guests: ["員珍(三姑媽)|女爸", "員珍(三姑媽)|女爸", "實珍(四姑媽)|女爸", "實珍(四姑媽)|女爸", "大伯|女爸", "大伯|女爸", "二伯|女爸", "二伯|女爸", "二伯|女爸"] },
+    { table: "任2", col: 3, row: 2, guests: ["四叔叔|女爸", "四叔叔|女爸", "四叔叔|女爸", "四叔叔|女爸", "四叔叔|女爸", "四叔叔|女爸", "四叔叔|女爸", "小叔叔|女爸", "小嬸嬸|女爸"] },
+    
+    { table: "楊2", col: 1, row: 3, guests: ["楊承祐", "楊承祐", "藍淯柔", "藍淯柔", "藍浚銘", "藍浚銘", "馬國維", "馬國綸", "楊晴瑜", "楊晴瑄"] },
+    { table: "任3", col: 2, row: 3, guests: ["資珍(二姑媽)|女爸", "資珍(二姑媽)|女爸", "資珍(二姑媽)|女爸", "小寶(二姑媽)|女爸", "小寶(二姑媽)|女爸", "小寶(二姑媽)|女爸", "小寶(二姑媽)|女爸", "得明(大姑媽)|女爸", "得明(大姑媽)|女爸"] },
+    { table: "任4", col: 3, row: 3, guests: ["得光(大姑媽)|女爸", "得光(大姑媽)|女爸", "得光(大姑媽)|女爸", "得光(大姑媽)|女爸", "得光(大姑媽)|女爸", "得真(大姑媽)|女爸", "得真(大姑媽)|女爸", "得真(大姑媽)|女爸", "得真(大姑媽)|女爸"] },
+    
+    // 古 (媽媽那邊)
+    { table: "古1", col: 1, row: 4, guests: ["阿公|男媽", "阿婆|男媽", "舅公|男媽", "舅婆|男媽", "大阿姨|男媽", "大阿姨|男媽", "大阿姨|男媽", "大阿姨|男媽", "大阿姨|男媽", "小阿姨|男媽"] },
+    // 李 (媽媽那邊)
+    { table: "李1", col: 2, row: 4, guests: ["大舅公|女媽", "大舅公|女媽", "大舅公|女媽", "大舅公|女媽", "五舅婆|女媽", "五舅婆|女媽", "五舅婆|女媽", "五舅婆|女媽", "大舅舅|女媽", "黃月霞|女媽"] },
+    { table: "李2", col: 3, row: 4, guests: ["小舅舅|女媽", "舅媽|女媽", "李奕霆", "李奕霆", "李奕樊", "李奕樊", "吳明晃(姨婆家)|女媽", "吳明晃(姨婆家)|女媽"] },
+    
+    { table: "古2", col: 1, row: 5, guests: ["大舅|男媽", "大舅|男媽", "大舅|男媽", "大舅|男媽", "小舅|男媽", "小舅|男媽", "小舅|男媽", "小舅|男媽"] },
+    { table: "李3+任靜", col: 2, row: 5, guests: ["黃佳文(三舅公)|女媽", "黃佳文(三舅公)|女媽", "黃馥茗(三舅公)|女媽", "黃正光(三舅公)|女媽", "四舅公|女媽", "李季謙", "張蕙心", "楊于萱", "楊于萱", "王姿晴"] },
+    { table: "李4", col: 3, row: 5, guests: ["吳祖宇", "吳祖宇", "陳增雄", "陳增雄", "黎易徵", "黎易徵", "徐瑋廷", "徐瑋廷", "徐瑋廷", "徐瑋廷"] },
+    
+    { table: "蝦尉先1", col: 1, row: 6, guests: ["姜建成", "黃清軒", "李庭宇", "李庭宇", "謝孟儒", "吳泓毅", "郭育宏", "陳劭傑"] },
+    { table: "蝦尉先2", col: 2, row: 6, guests: ["吳維軒", "江云", "陳章睿", "郭芊庭", "賴冠樺", "李奇軒", "曾敬珊", "平震傑", "平震傑"] },
+    { table: "老任", col: 3, row: 6, guests: ["徐珮晴", "徐珮晴", "林佩穎", "蘇庭萱", "陳平", "徐允心", "陳韻庭"] },
+    
+    { table: "睡王", col: 1, row: 7, guests: ["曹舒維", "曹舒維", "呂柏憲", "呂柏憲", "呂柏憲(兒童)", "呂柏憲(兒童)", "連晟鈞", "連晟鈞", "Amy(素食)", "王威智"] },
+    { table: "蝦尉先3", col: 2, row: 7, guests: ["柯任", "林咨辰", "蔡承諭", "黃品翔", "黃建智", "黃建智", "李俊億", "丘博勳"] },
+    { table: "竹東", col: 3, row: 7, guests: ["陳宜吟", "陳宜吟", "陳宜吟", "陳宜吟", "黃寶環", "黃寶環", "張欣憶", "張欣憶", "鄭文怡"] },
+    
+    { table: "阿皮", col: 1, row: 8, guests: ["李晟", "陳奕廷", "施昶榮", "林坤逸", "林坤逸", "林坤逸(兒童)", "林坤逸(兒童)", "黃聖筑", "黃聖筑", "邱仁豪"] },
+    { table: "蝦尉先4", col: 2, row: 8, guests: ["林閔翔", "尤禎", "李承恩", "呂秉澤", "楊承恩", "楊承恩", "陳人瑋", "吳彥寬"] }
+];
+
+
+// =====================================================================
+// 系統自動運作區 (無需手動修改)
+// =====================================================================
+
+let tableData = {};
+let tableLayout = {};
+let maleRelatives = [];
+let femaleRelatives = [];
+
+// 解析總表格並分類資料
+function parseWeddingData() {
+    weddingData.forEach(item => {
+        tableLayout[item.table] = { col: item.col, row: item.row };
+        
+        let cleanedGuests = [];
+        item.guests.forEach(guestInfo => {
+            let pureName = guestInfo;
+            
+            // 判斷親戚關係與歸屬，並移除標籤
+            if (guestInfo.includes('|男爸')) {
+                pureName = guestInfo.replace('|男爸', '');
+                if (!maleRelatives.some(r => r.name === pureName)) {
+                    maleRelatives.push({ name: pureName, parentSide: 'dad' });
+                }
+            } else if (guestInfo.includes('|男媽')) {
+                pureName = guestInfo.replace('|男媽', '');
+                if (!maleRelatives.some(r => r.name === pureName)) {
+                    maleRelatives.push({ name: pureName, parentSide: 'mom' });
+                }
+            } else if (guestInfo.includes('|女爸')) {
+                pureName = guestInfo.replace('|女爸', '');
+                if (!femaleRelatives.some(r => r.name === pureName)) {
+                    femaleRelatives.push({ name: pureName, parentSide: 'dad' });
+                }
+            } else if (guestInfo.includes('|女媽')) {
+                pureName = guestInfo.replace('|女媽', '');
+                if (!femaleRelatives.some(r => r.name === pureName)) {
+                    femaleRelatives.push({ name: pureName, parentSide: 'mom' });
+                }
+            }
+            cleanedGuests.push(pureName);
+        });
+        tableData[item.table] = cleanedGuests;
+    });
+}
+
+// 初始化地圖佈局
+function initMap() {
+    parseWeddingData();
+    const mapContainer = document.getElementById('map');
+    
+    const carpet = document.createElement('div');
+    carpet.className = 'red-carpet';
+    mapContainer.appendChild(carpet);
+    
+    for (const [tableName, position] of Object.entries(tableLayout)) {
+        const div = document.createElement('div');
+        div.className = 'table-circle';
+        if (tableName === '主桌') div.classList.add('main-table');
+        div.id = 'table-' + tableName;
+        div.innerText = tableName;
+        
+        div.style.gridColumn = position.col;
+        div.style.gridRow = position.row;
+        mapContainer.appendChild(div);
+    }
+}
+
+// 動態更新長輩選項與顏色
+function updateElderOptions() {
+    const side = document.getElementById('side-select').value;
+    const elderSelect = document.getElementById('elder-select');
+    elderSelect.innerHTML = '<option value="">請選擇</option>';
+    
+    let options = [];
+    if (side === 'male') options = maleRelatives;
+    else if (side === 'female') options = femaleRelatives;
+    
+    options.forEach(opt => {
+        const optionEl = document.createElement('option');
+        optionEl.value = opt.name;
+        optionEl.innerText = opt.name;
+        
+        // 依照爸爸/媽媽那邊填入對應的背景色
+        if (opt.parentSide === 'dad') {
+            optionEl.style.backgroundColor = '#eaf4ff'; // 淺藍色
+        } else if (opt.parentSide === 'mom') {
+            optionEl.style.backgroundColor = '#ffe4e8'; // 淺紅色
+        }
+        
+        elderSelect.appendChild(optionEl);
+    });
+}
+
+function clearHighlight() {
+    document.querySelectorAll('.table-circle').forEach(el => {
+        el.classList.remove('highlight');
+    });
+    document.getElementById('guest-panel').style.display = 'none';
+    document.getElementById('guest-list').innerHTML = '';
+}
+
+// 精確比對搜尋邏輯與座位計算
+function executeSearch(query) {
+    if (!query) return;
+    clearHighlight();
+    
+    let foundTables = [];
+    for (const [tableName, guests] of Object.entries(tableData)) {
+        if (guests.includes(query)) {
+            foundTables.push(tableName);
+        }
+    }
+    
+    if (foundTables.length > 0) {
+        let listHTML = '';
+        const guestPanelTitle = document.getElementById('guest-panel-title');
+        
+        foundTables.forEach((t, index) => {
+            const el = document.getElementById('table-' + t);
+            if (el) {
+                el.classList.add('highlight');
+            }
+            
+            if (index > 0) {
+                listHTML += '<li style="list-style:none; text-align:center; color:#ccc; margin: 10px 0;">---</li>';
+            }
+            
+            const guests = tableData[t];
+            
+            const guestCounts = {};
+            guests.forEach(g => {
+                guestCounts[g] = (guestCounts[g] || 0) + 1;
+            });
+            
+            Object.keys(guestCounts).forEach(guest => {
+                const count = guestCounts[guest];
+                let displayText = guest;
+                
+                if (count > 1) {
+                    displayText += `<span class="seat-count">(${count}個位子)</span>`;
+                }
+
+                if (guest === query) {
+                    listHTML += `<li><span class="guest-highlight">${displayText} ⬅ 您的位置</span></li>`;
+                } else {
+                    listHTML += `<li>${displayText}</li>`;
+                }
+            });
+            
+            if (index === 0) {
+                 guestPanelTitle.innerText = `【 ${t} 】 同桌名單`;
+            } else {
+                 guestPanelTitle.innerText = '同桌名單'; 
+            }
+        });
+
+        document.getElementById('guest-list').innerHTML = listHTML;
+        document.getElementById('guest-panel').style.display = 'flex';
+        
+        document.querySelector('.content-wrapper').scrollIntoView({ behavior: 'smooth' });
+    } else {
+        alert('找不到此姓名或稱呼，請確認輸入是否正確唷！');
+    }
+}
+
+function searchRelative() {
+    const query = document.getElementById('elder-select').value;
+    if (!query) {
+        alert('請選擇長輩稱呼！');
+        return;
+    }
+    executeSearch(query);
+}
+
+function searchFriend() {
+    const query = document.getElementById('friend-name').value.trim();
+    if (!query) {
+        alert('請輸入姓名！');
+        return;
+    }
+    executeSearch(query);
+}
+
+window.onload = initMap;
+</script>
 </body>
 </html>
