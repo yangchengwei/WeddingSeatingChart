@@ -115,7 +115,7 @@
         background: #fff;
         border: 2px solid #e5989b;
         border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; 
-        padding: 25px;
+        padding: 80px 25px; 
         box-shadow: 4px 4px 0px #f8cad0;
         display: grid;
         grid-template-columns: repeat(3, 1fr); 
@@ -124,6 +124,47 @@
         justify-items: center;
         align-items: center;
         position: relative;
+    }
+
+    /* 舞台樣式 - 加上原有手繪感圓角與陰影 */
+    .stage {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        padding: 12px;
+        background: #fff;
+        border: 2px solid #e5989b;
+        border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #e5989b;
+        box-shadow: 4px 4px 0px #f8cad0;
+        letter-spacing: 4px;
+        z-index: 10;
+    }
+
+    /* 入口樣式 - 精算位置對齊紅毯正下方，加入手繪感風格 */
+    .entrance {
+        position: absolute;
+        bottom: 20px;
+        /* 考量 grid gap 20px 與 padding 25px，紅毯中心精確落在 33.333% + 5px 的位置 */
+        left: calc(33.333% + 5px); 
+        transform: translateX(-50%);
+        width: 120px;
+        padding: 10px;
+        background: #fff;
+        border: 2px dashed #b5838d;
+        border-radius: 15px 255px 15px 225px/255px 15px 225px 15px; 
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        color: #b5838d;
+        box-shadow: 2px 2px 0px rgba(181, 131, 141, 0.2);
+        letter-spacing: 4px;
+        z-index: 10;
     }
 
     /* 紅毯 (簡約直角長方形版) */
@@ -203,7 +244,11 @@
         position: relative;
         margin-bottom: 4px;
     }
-    .guest-list-content li::before {
+    /* 針對桌名標題隱藏愛心符號 */
+    .guest-list-content li.table-header::before {
+        content: none;
+    }
+    .guest-list-content li:not(.table-header)::before {
         content: "♥";
         color: #ffb4a2;
         position: absolute;
@@ -231,7 +276,7 @@
 <h1>💕 婚禮座位查詢 💕</h1>
 
 <div class="search-container">
-    <div class="section-title">搜尋家人</div>
+    <div class="section-title">搜尋稱謂</div>
     <div class="search-row">
         <select id="side-select" onchange="updateElderOptions()">
             <option value="">男方 / 女方</option>
@@ -246,20 +291,24 @@
 
     <div class="divider"></div>
 
-    <div class="section-title">搜尋朋友</div>
+    <div class="section-title">搜尋姓名</div>
     <div class="search-row">
-        <input type="text" id="friend-name" placeholder="請輸入全名 (如：楊承尉)">
+        <input type="text" id="friend-name" placeholder="請輸入姓名 (支援輸入部分關鍵字)">
         <button onclick="searchFriend()">搜尋</button>
     </div>
 </div>
 
 <div class="content-wrapper">
     <div class="map-container" id="map">
+        <!-- 舞台與入口 -->
+        <div class="stage">舞 台</div>
+        <div class="entrance">入 口</div>
         <!-- 桌次地圖將由 JS 生成 -->
     </div>
 
     <div class="guest-list-panel" id="guest-panel">
-        <div class="guest-list-title" id="guest-panel-title">同桌名單</div>
+        <!-- 統一面板標題 -->
+        <div class="guest-list-title" id="guest-panel-title">查詢結果</div>
         <ul class="guest-list-content" id="guest-list">
             <!-- 名單將由 JS 填入 -->
         </ul>
@@ -304,7 +353,7 @@ const weddingData = [
     { table: "蝦尉先2", col: 2, row: 6, guests: ["吳維軒", "江云", "陳章睿", "郭芊庭", "賴冠樺", "李奇軒", "曾敬珊", "平震傑", "平震傑"] },
     { table: "老任", col: 3, row: 6, guests: ["徐珮晴", "徐珮晴", "林佩穎", "蘇庭萱", "陳平", "徐允心", "陳韻庭"] },
     
-    { table: "睡王", col: 1, row: 7, guests: ["曹舒維", "曹舒維", "呂柏憲", "呂柏憲", "呂柏憲(兒童)", "呂柏憲(兒童)", "連晟鈞", "連晟鈞", "Amy(素食)", "王威智"] },
+    { table: "睡王", col: 1, row: 7, guests: ["曹舒維", "曹舒維", "呂柏憲", "呂柏憲", "呂柏憲(兒童)", "呂柏憲(兒童)", "連晟鈞", "連晟鈞", "郭紋秀(素食)", "王威智"] },
     { table: "蝦尉先3", col: 2, row: 7, guests: ["柯任", "林咨辰", "蔡承諭", "黃品翔", "黃建智", "黃建智", "李俊億", "丘博勳"] },
     { table: "竹東", col: 3, row: 7, guests: ["陳宜吟", "陳宜吟", "陳宜吟", "陳宜吟", "黃寶環", "黃寶環", "張欣憶", "張欣憶", "鄭文怡"] },
     
@@ -418,7 +467,6 @@ function clearHighlight() {
 }
 
 // 精確比對搜尋邏輯與座位計算
-// 加入 searchType 參數，區分是「搜尋親戚(精確比對)」還是「搜尋朋友(模糊比對)」
 function executeSearch(query, searchType) {
     if (!query) return;
     clearHighlight();
@@ -428,11 +476,11 @@ function executeSearch(query, searchType) {
         let matchFound = false;
         
         if (searchType === 'relative') {
-            // 長輩搜尋：完全比對包含標籤的原始字串 (例如 "大舅公|男爸")
+            // 稱謂搜尋：完全比對包含標籤的原始字串 (例如 "大舅公|男爸")
             if (guests.includes(query)) matchFound = true;
         } else {
-            // 朋友搜尋：確保沒有 '|' 標籤 (排除下拉選單裡的親屬)，並且直接完全匹配 (不模糊比對)
-            if (guests.some(g => !g.includes('|') && g === query)) matchFound = true;
+            // 姓名搜尋：確保沒有 '|' 標籤 (排除下拉選單裡的親屬)，並改為模糊比對 (包含該字串即可)
+            if (guests.some(g => !g.includes('|') && g.includes(query))) matchFound = true;
         }
 
         if (matchFound) {
@@ -442,7 +490,9 @@ function executeSearch(query, searchType) {
     
     if (foundTables.length > 0) {
         let listHTML = '';
-        const guestPanelTitle = document.getElementById('guest-panel-title');
+        
+        // 將面板總標題固定為「查詢結果」
+        document.getElementById('guest-panel-title').innerText = '查詢結果';
         
         foundTables.forEach((t, index) => {
             const el = document.getElementById('table-' + t);
@@ -450,9 +500,9 @@ function executeSearch(query, searchType) {
                 el.classList.add('highlight');
             }
             
-            if (index > 0) {
-                listHTML += '<li style="list-style:none; text-align:center; color:#ccc; margin: 10px 0;">---</li>';
-            }
+            // 針對每一桌插入專屬的「桌名標題」
+            const marginTop = index > 0 ? '20px' : '5px';
+            listHTML += `<li class="table-header" style="text-align:center; font-size:16px; font-weight:bold; color:#d58386; margin: ${marginTop} 0 10px 0; border-bottom: 2px dashed #fff0f3; padding-bottom: 5px;">📍 【 ${t} 】</li>`;
             
             const guests = tableData[t];
             
@@ -467,14 +517,13 @@ function executeSearch(query, searchType) {
                 // 顯示在畫面上時，一律去掉標籤
                 let pureName = rawGuest.split('|')[0];
                 
-                // --- 新增：主桌爸爸媽媽特殊處理 ---
+                // 主桌爸爸媽媽特殊處理
                 if (t === '主桌') {
                     if (rawGuest === '爸爸|男爸') pureName = '楊爸爸';
                     if (rawGuest === '媽媽|男媽') pureName = '楊媽媽';
                     if (rawGuest === '爸爸|女爸') pureName = '任爸爸';
                     if (rawGuest === '媽媽|女媽') pureName = '任媽媽';
                 }
-                // ---------------------------------
 
                 let displayText = pureName;
                 
@@ -485,8 +534,8 @@ function executeSearch(query, searchType) {
                 // 判斷這個項目是否為被搜尋的目標
                 let isTarget = false;
                 if (searchType === 'relative' && rawGuest === query) isTarget = true;
-                // 朋友搜尋時：目標必須沒有 '|' 且名字完全等於 query
-                if (searchType === 'friend' && !rawGuest.includes('|') && rawGuest === query) isTarget = true;
+                // 姓名搜尋時：目標必須沒有 '|' 且名字包含 query (模糊比對)
+                if (searchType === 'friend' && !rawGuest.includes('|') && rawGuest.includes(query)) isTarget = true;
 
                 if (isTarget) {
                     listHTML += `<li><span class="guest-highlight">${displayText} ⬅ 您的位置</span></li>`;
@@ -494,12 +543,6 @@ function executeSearch(query, searchType) {
                     listHTML += `<li>${displayText}</li>`;
                 }
             });
-            
-            if (index === 0) {
-                 guestPanelTitle.innerText = `【 ${t} 】 同桌名單`;
-            } else {
-                 guestPanelTitle.innerText = '同桌名單'; 
-            }
         });
 
         document.getElementById('guest-list').innerHTML = listHTML;
@@ -507,14 +550,14 @@ function executeSearch(query, searchType) {
         
         document.querySelector('.content-wrapper').scrollIntoView({ behavior: 'smooth' });
     } else {
-        alert('找不到此姓名，請確認輸入是否正確唷！');
+        alert('找不到此資料，請確認輸入是否正確唷！');
     }
 }
 
 function searchRelative() {
     const query = document.getElementById('elder-select').value;
     if (!query) {
-        alert('請選擇長輩稱呼！');
+        alert('請選擇稱呼！');
         return;
     }
     executeSearch(query, 'relative'); // 傳入搜尋類型
@@ -527,7 +570,7 @@ function searchFriend() {
         return;
     }
     
-    // 新增：防呆兼開玩笑機制 (拿掉 return 讓他可以繼續往下搜尋)
+    // 防呆兼開玩笑機制
     if (query === '楊承尉') {
         alert('你不是楊承尉😏');
     } else if (query === '任靜宜') {
